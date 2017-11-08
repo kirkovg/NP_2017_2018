@@ -1,6 +1,7 @@
 package mk.ukim.finki.np.midterms.first.task11;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
@@ -39,14 +40,14 @@ public class TaskSchedulerTest {
     }
 }
 
-class TaskRunner<T> {
+class TaskRunner<T extends Task> {
     public void run(TaskScheduler<T> scheduler, T[] tasks) {
         List<T> order = scheduler.schedule(tasks);
         order.forEach(System.out::println);
     }
 }
 
-interface TaskScheduler<T> {
+interface TaskScheduler<T extends Task> {
     List<T> schedule(T[] tasks);
 }
 
@@ -54,7 +55,7 @@ interface Task  {
     int getOrder();
 }
 
-class PriorityTask implements Task, Comparable<PriorityTask> {
+class PriorityTask implements Task {
     private final int priority;
 
     public PriorityTask(int priority) {
@@ -70,14 +71,9 @@ class PriorityTask implements Task, Comparable<PriorityTask> {
     public int getOrder() {
         return priority;
     }
-
-    @Override
-    public int compareTo(PriorityTask o) {
-        return Integer.compare(this.priority, o.priority);
-    }
 }
 
-class TimedTask implements Task, Comparable<TimedTask> {
+class TimedTask implements Task{
     private final int time;
 
     public TimedTask(int time) {
@@ -93,33 +89,26 @@ class TimedTask implements Task, Comparable<TimedTask> {
     public int getOrder() {
         return time;
     }
-
-    @Override
-    public int compareTo(TimedTask o) {
-       return Integer.compare(this.time, o.time);
-    }
 }
 
 class Schedulers {
-    public static TaskScheduler<Task> getOrdered() {
-        return new TaskScheduler<Task>() {
+    public static <T extends Task> TaskScheduler<T> getOrdered() {
+        return new TaskScheduler<T>() {
             @Override
-            public List<Task> schedule(Task[] tasks) {
-                Task[] copy = Arrays.copyOf(tasks, tasks.length);
-                Arrays.sort(copy);
-                return Arrays.asList(copy);
+            public List<T> schedule(T[] tasks) {
+                return Arrays.stream(tasks)
+                        .sorted(Comparator.comparing(Task::getOrder))
+                        .collect(Collectors.toList());
             }
         };
 
         // lambda solution
-        /*return tasks -> {
-            Task[] copy = Arrays.copyOf(tasks, tasks.length);
-            Arrays.sort(copy);
-            return Arrays.asList(copy);
-        };*/
+        /*return tasks -> Arrays.stream(tasks)
+                .sorted(Comparator.comparing(Task::getOrder))
+                .collect(Collectors.toList());*/
     }
 
-    public static TaskScheduler<Task> getFiltered(int order) {
+    public static <T extends Task> TaskScheduler<T> getFiltered(int order) {
         return tasks -> Arrays.stream(tasks)
                 .filter(t -> t.getOrder() <= order)
                 .collect(Collectors.toList());
