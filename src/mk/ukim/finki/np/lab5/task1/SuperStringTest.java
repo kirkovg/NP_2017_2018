@@ -1,4 +1,4 @@
-package mk.ukim.finki.np.lab5;
+package mk.ukim.finki.np.lab5.task1;
 
 import java.util.Collections;
 import java.util.LinkedList;
