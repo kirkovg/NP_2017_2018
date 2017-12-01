@@ -77,7 +77,7 @@ class BinaryTreeSet<T extends Comparable<T>> {
             sb.append(node.element).append(" ");
             inorder(node.succ, sb);
         }
-        return sb.toString();
+        return sb.toString().trim();
     }
 
     private T getRightmost(Node<T> node) {
